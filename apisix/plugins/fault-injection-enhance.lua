@@ -46,6 +46,9 @@ local schema = {
     minProperties = 1,
 }
 
+-- local s = "{\"dataList\":null,\"status\":\"000\",\"dataMap\":{\"SERVER_TIME\":\"$20201124$\"},\"msg\":\"执行成功！\"}"
+
+--s1 = string.gsub(s,"%b$$","liwu")
 
 local _M = {
     version = 0.1,
@@ -88,10 +91,7 @@ function _M.rewrite(conf, ctx)
        and conf.abort.http_status ~= nil
        and sample_hit(conf.abort.percentage)
     then
-        -- core.log.debug("sss1 ", conf.abort.body)
-        local body = string.gsub(conf.abort.body, "%$(.-)%$", function (func)  return loadstring(func)() end)
-        -- core.log.debug("abortwwwu ", body)
-        return conf.abort.http_status, body
+        return conf.abort.http_status, conf.abort.body
     end
 end
 
