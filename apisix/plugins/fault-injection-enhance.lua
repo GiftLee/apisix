@@ -50,6 +50,14 @@ local schema = {
 
 --s1 = string.gsub(s,"%b$$","liwu")
 
+--s="{\"dataList\":null,\"status\":\"000\",\"dataMap\":{\"SERVER_TIME\":\"$return os.date(\"%Y%m%d\")$\"},\"msg\":\"执行成功！\"}"
+--s1 = string.gsub(s, "%$(.-)%$", function (func)  return loadstring(func)() end)
+
+-- s="{\"dataList\":null,\"status\":\"000\",\"dataMap\":{\"SERVER_TIME\":\"$return os.date(\"%Y%m%d\")$\"},\"msg\":\"$return 5+5$\"}"        
+
+--s1 = string.gsub(s, "%$(.-)%$", function (func)  return loadstring(func)() end)
+
+
 local _M = {
     version = 0.1,
     priority = 11000,
@@ -91,7 +99,9 @@ function _M.rewrite(conf, ctx)
        and conf.abort.http_status ~= nil
        and sample_hit(conf.abort.percentage)
     then
-        return conf.abort.http_status, conf.abort.body
+        local body = string.gsub(conf.abort.body, "%$(.-)%$", function (func)  return loadstring(func)() end)
+
+        return conf.abort.http_status, body
     end
 end
 
