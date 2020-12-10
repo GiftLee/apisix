@@ -1,5 +1,3 @@
-#!/usr/bin/env lua
-
 --
 -- Licensed to the Apache Software Foundation (ASF) under one or more
 -- contributor license agreements.  See the NOTICE file distributed with
@@ -16,21 +14,29 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 --
+local expr = require("resty.expr.v1")
+local plugin_checker = require("apisix.plugin").plugin_checker
 
-local pkg_cpath_org = package.cpath
-local pkg_path_org = package.path
 
-local apisix_home = "/usr/local/apisix"
-local pkg_cpath = apisix_home .. "/deps/lib64/lua/5.1/?.so;"
-                  .. apisix_home .. "/deps/lib/lua/5.1/?.so;;"
-local pkg_path = apisix_home .. "/deps/share/lua/5.1/?.lua;;"
+local _M = {}
 
--- modify the load path to load our dependencies
-package.cpath = pkg_cpath .. pkg_cpath_org
-package.path  = pkg_path .. pkg_path_org
 
--- pass path to construct the final result
-local env = require("apisix.cli.env")(apisix_home, pkg_cpath_org, pkg_path_org)
-local ops = require("apisix.cli.ops")
+-- additional check for synced route configuration, run after schema check
+function _M.check_route(route)
+    local ok, err = plugin_checker(route)
+    if not ok then
+        return nil, err
+    end
 
-ops.execute(env, arg)
+    if route.vars then
+        ok, err = expr.new(route.vars)
+        if not ok then
+            return nil, "failed to validate the 'vars' expression: " .. err
+        end
+    end
+
+    return true
+end
+
+
+return _M

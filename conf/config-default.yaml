@@ -177,6 +177,7 @@ etcd:
                                   # e.g. "https://127.0.0.1:2379".
   prefix: "/apisix"               # apisix configurations prefix
   timeout: 30                     # 30 seconds
+  # resync_delay: 5               # when sync failed and a rest is needed, resync after the configured seconds plus 50% random jitter
   # user: root                    # root username for etcd
   # password: 5tHkHhYkjr6cQY      # root password for etcd
   tls:
@@ -217,7 +218,7 @@ plugins:                          # plugin list (sorted in alphabetical order)
   - limit-count
   - limit-req
   #- log-rotate
-  - node-status
+  #- node-status
   - openid-connect
   - prometheus
   - proxy-cache
@@ -238,6 +239,7 @@ plugins:                          # plugin list (sorted in alphabetical order)
   - uri-blocker
   - wolf-rbac
   - zipkin
+  #- server-info
 
 stream_plugins:
   - mqtt-proxy
@@ -252,3 +254,6 @@ plugin_attr:
     endpoint_addr: http://127.0.0.1:12800
   prometheus:
     export_uri: /apisix/prometheus/metrics
+  server-info:
+    report_interval: 60 # server info report interval (unit: second)
+    report_ttl: 3600    # live time for server info in etcd (unit: second)
